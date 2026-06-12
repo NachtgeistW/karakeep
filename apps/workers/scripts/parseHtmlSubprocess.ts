@@ -9,6 +9,7 @@ import metascraperAuthor from "metascraper-author";
 import metascraperDate from "metascraper-date";
 import metascraperDescription from "metascraper-description";
 import metascraperImage from "metascraper-image";
+import metascraperLogo from "metascraper-logo-favicon";
 import metascraperPublisher from "metascraper-publisher";
 import metascraperTitle from "metascraper-title";
 import metascraperUrl from "metascraper-url";
@@ -22,7 +23,6 @@ import logger from "@karakeep/shared/logger";
 
 import metascraperAmazonImproved from "../metascraper-plugins/metascraper-amazon-improved";
 import metascraperReddit from "../metascraper-plugins/metascraper-reddit";
-import metascraperSafeFavicon from "../metascraper-plugins/metascraper-safe-favicon";
 import {
   parseSubprocessErrorSchema,
   parseSubprocessInputSchema,
@@ -59,7 +59,18 @@ const metascraperParser = metascraper([
   metascraperDescription(),
   metascraperX(),
   metascraperImage(),
-  metascraperSafeFavicon(),
+  metascraperLogo({
+    gotOpts: {
+      agent: {
+        http: serverConfig.proxy.httpProxy
+          ? new HttpProxyAgent(getRandomProxy(serverConfig.proxy.httpProxy))
+          : undefined,
+        https: serverConfig.proxy.httpsProxy
+          ? new HttpsProxyAgent(getRandomProxy(serverConfig.proxy.httpsProxy))
+          : undefined,
+      },
+    },
+  }),
   metascraperUrl(),
 ]);
 
@@ -109,6 +120,28 @@ function normalizeLazyLoadImages(document: Document): void {
   }
 }
 
+function stripTwitterReplies(document: Document, url: string): void {
+  try {
+    const hostname = new URL(url).hostname;
+    if (!isTwitterHost(hostname)) {
+      return;
+    }
+  } catch {
+    return;
+  }
+  // Keep only the first tweet article element; remove all replies that follow
+  const articles = document.querySelectorAll('article[data-testid="tweet"]');
+  for (let i = 1; i < articles.length; i++) {
+    articles[i].remove();
+  }
+}
+
+function isTwitterHost(hostname: string): boolean {
+  return ["twitter.com", "x.com"].some(
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+  );
+}
+
 function extractReadableContent(
   htmlContent: string,
   url: string,
@@ -117,6 +150,7 @@ function extractReadableContent(
   const dom = new JSDOM(htmlContent, { url, virtualConsole });
   try {
     normalizeLazyLoadImages(dom.window.document);
+    stripTwitterReplies(dom.window.document, url);
     const readableContent = new Readability(dom.window.document).parse();
     if (!readableContent || typeof readableContent.content !== "string") {
       return null;
