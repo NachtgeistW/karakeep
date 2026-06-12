@@ -109,26 +109,49 @@ function normalizeLazyLoadImages(document: Document): void {
   }
 }
 
-function stripTwitterReplies(document: Document, url: string): void {
-  try {
-    const hostname = new URL(url).hostname;
-    if (!isTwitterHost(hostname)) {
-      return;
-    }
-  } catch {
-    return;
-  }
-  // Keep only the first tweet article element; remove all replies that follow
-  const articles = document.querySelectorAll('article[data-testid="tweet"]');
-  for (let i = 1; i < articles.length; i++) {
-    articles[i].remove();
-  }
-}
-
 function isTwitterHost(hostname: string): boolean {
   return ["twitter.com", "x.com"].some(
     (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
   );
+}
+
+/**
+ * On tweet permalink pages, the conversation ancestors are rendered above the
+ * bookmarked tweet and the replies below it, all as sibling tweet articles.
+ * Keep only the article whose permalink matches the status ID in the page URL
+ * (every tweet article carries its own /status/<id> timestamp anchor), so the
+ * archived content is the bookmarked tweet rather than the conversation root.
+ */
+function stripTwitterReplies(document: Document, url: string): void {
+  let statusId: string | undefined;
+  try {
+    const parsed = new URL(url);
+    if (!isTwitterHost(parsed.hostname)) {
+      return;
+    }
+    statusId = /\/status(?:es)?\/(\d+)/.exec(parsed.pathname)?.[1];
+  } catch {
+    return;
+  }
+
+  const articles = Array.from(
+    document.querySelectorAll('article[data-testid="tweet"]'),
+  );
+  if (articles.length <= 1) {
+    return;
+  }
+
+  // Fall back to the first article when the URL has no status ID (e.g. profile
+  // pages) or the focused tweet's timestamp isn't rendered as a link.
+  const focused = statusId
+    ? articles.find((a) => a.querySelector(`a[href*="/status/${statusId}"]`))
+    : undefined;
+  const keep = focused ?? articles[0];
+  for (const article of articles) {
+    if (article !== keep) {
+      article.remove();
+    }
+  }
 }
 
 function extractReadableContent(
