@@ -126,14 +126,8 @@ RUN apt-get update \
         ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-ARG TARGETARCH
-RUN case ${TARGETARCH} in \
-        "amd64")  YTDLP_FILE=yt-dlp_linux ;; \
-        "arm64")  YTDLP_FILE=yt-dlp_linux_aarch64 ;; \
-        *) echo "Unsupported arch: ${TARGETARCH}" && exit 1 ;; \
-    esac \
-    && curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/${YTDLP_FILE} -o /usr/local/bin/yt-dlp \
-    && chmod +x /usr/local/bin/yt-dlp
+COPY yt-dlp /usr/local/bin/yt-dlp
+RUN chmod +x /usr/local/bin/yt-dlp
 
 # yt-dlp >=2025.x requires a JavaScript runtime to extract YouTube formats.
 # Deno is yt-dlp's default but is not present in this image. Node is the

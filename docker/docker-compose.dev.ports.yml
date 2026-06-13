@@ -1,0 +1,11 @@
+services:
+  web:
+    ports:
+      - "3001:3000"
+    environment:
+      NEXTAUTH_URL: http://localhost:3001
+  chrome:
+    ports:
+      - "9223:9222"
+  meilisearch:
+    ports: []
