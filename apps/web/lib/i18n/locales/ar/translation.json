@@ -60,9 +60,9 @@
     "delete": "حذف",
     "refresh": "تحديث",
     "recrawl": "إعادة الاستكشاف",
-    "download_full_page_archive": "تحميل أرشيف الصفحة الكامل",
     "edit_tags": "تحرير الوسوم",
     "add_to_list": "إضافة إلى القائمة",
+    "select": "تحديد",
     "select_all": "تحديد الكل",
     "unselect_all": "إلغاء تحديد الكل",
     "copy_link": "نسخ الرابط",
@@ -96,6 +96,7 @@
     "load_more": "المزيد",
     "edit_notes": "تحرير الملاحظات",
     "preserve_as_pdf": "حفظ كملف PDF",
+    "preserve_video": "حفظ الفيديو",
     "offline_copies": "نسخ غير متصلة بالإنترنت",
     "preserve_offline_archive": "احتفظ بالأرشيفات غير المتصلة بالإنترنت",
     "download_full_page_archive_file": "تنزيل ملف الأرشيف",
@@ -350,6 +351,10 @@
           "users": {
             "label": "المسؤول: المستخدمون",
             "description": "الوصول إلى الإدارة الإدارية للمستخدمين."
+          },
+          "subscriptions": {
+            "label": "المسؤول: الاشتراكات",
+            "description": "إدارة فئات اشتراك المستخدمين."
           }
         }
       }
@@ -358,7 +363,65 @@
       "broken_links": "روابط معطلة",
       "last_crawled_at": "آخر استكشاف في",
       "crawling_status": "حالة الاستكشاف",
-      "crawling_failed": "فشل الاستكشاف"
+      "crawling_failed": "فشل الاستكشاف",
+      "description": "راجع الروابط التي تعذّر جلبها، وأعد المحاولة أو احذف الإشارات المرجعية القديمة.",
+      "category_all": "تحتاج إلى مراجعة",
+      "category_blocked": "الوصول محظور",
+      "category_missing": "غير موجود",
+      "category_errors": "أخطاء أخرى",
+      "category_all_hint": "روابط للمراجعة",
+      "category_blocked_hint": "مقيّد أو تجاوز حد الطلبات",
+      "category_missing_hint": "الصفحة مفقودة أو محذوفة",
+      "category_errors_hint": "أخطاء في الخادم أو في الاستكشاف",
+      "blocked_hint": "لا يعني الطلب المحظور دائمًا أن الرابط معطّل. بعض المواقع تقيّد الوصول الآلي. افتح الصفحة الأصلية للتحقق قبل الحذف.",
+      "search": "ابحث بالعنوان أو الرابط…",
+      "sort_recent": "المفحوصة مؤخرًا",
+      "sort_oldest": "الأقدم فحصًا أولاً",
+      "sort_domain": "الموقع A–Z",
+      "result_count_one": "رابط واحد للمراجعة",
+      "result_count_other": "{{count}} رابط للمراجعة",
+      "retry_selected": "إعادة محاولة المحدد",
+      "empty": "لم يتم العثور على روابط معطلة",
+      "empty_description": "لا يوجد حاليًا أي خطأ استكشاف مُبلّغ عنه في روابطك المحفوظة.",
+      "select_visible": "تحديد كل الروابط الظاهرة",
+      "bookmark": "الإشارة المرجعية",
+      "issue": "المشكلة",
+      "never_crawled": "لا يوجد تاريخ استكشاف",
+      "issue_blocked": "الوصول محظور",
+      "issue_missing": "غير موجود",
+      "issue_server": "خطأ في الخادم",
+      "issue_http": "خطأ HTTP",
+      "issue_failed": "فشل الاستكشاف",
+      "issue_blocked_hint": "قيّد الموقع هذا الطلب",
+      "issue_missing_hint": "ربما تمت إزالة الصفحة",
+      "issue_server_hint": "تعذّر على الموقع إكمال الطلب",
+      "issue_http_hint": "أرجع الموقع استجابة غير متوقعة",
+      "issue_failed_hint": "لم يتم تسجيل أي استجابة ناجحة",
+      "queued": "في قائمة الانتظار",
+      "queued_count_one": "تمت إضافة رابط واحد إلى قائمة الانتظار لإعادة الاستكشاف.",
+      "queued_count_other": "تمت إضافة {{count}} رابط إلى قائمة الانتظار لإعادة الاستكشاف.",
+      "deleted_count_one": "تم حذف إشارة مرجعية واحدة.",
+      "deleted_count_other": "تم حذف {{count}} إشارة مرجعية.",
+      "action_failed": "فشل {{count}} من أصل {{total}}.",
+      "delete_title_one": "حذف إشارة مرجعية واحدة؟",
+      "delete_title_other": "حذف {{count}} إشارة مرجعية؟",
+      "delete_description": "سيؤدي هذا إلى حذف الإشارات المرجعية المحددة وملفاتها المحفوظة وتمييزاتها وملاحظاتها نهائيًا. لا يمكن التراجع عن ذلك.",
+      "result_count_zero": "لا توجد روابط للمراجعة",
+      "result_count_two": "رابطان للمراجعة",
+      "result_count_few": "{{count}} روابط للمراجعة",
+      "result_count_many": "{{count}} رابطًا للمراجعة",
+      "queued_count_zero": "لم تتم إضافة أي رابط إلى قائمة الانتظار لإعادة الاستكشاف.",
+      "queued_count_two": "تمت إضافة رابطين إلى قائمة الانتظار لإعادة الاستكشاف.",
+      "queued_count_few": "تمت إضافة {{count}} روابط إلى قائمة الانتظار لإعادة الاستكشاف.",
+      "queued_count_many": "تمت إضافة {{count}} رابطًا إلى قائمة الانتظار لإعادة الاستكشاف.",
+      "deleted_count_zero": "لم يتم حذف أي إشارة مرجعية.",
+      "deleted_count_two": "تم حذف إشارتين مرجعيتين.",
+      "deleted_count_few": "تم حذف {{count}} إشارات مرجعية.",
+      "deleted_count_many": "تم حذف {{count}} إشارة مرجعية.",
+      "delete_title_zero": "حذف {{count}} إشارة مرجعية؟",
+      "delete_title_two": "حذف إشارتين مرجعيتين؟",
+      "delete_title_few": "حذف {{count}} إشارات مرجعية؟",
+      "delete_title_many": "حذف {{count}} إشارة مرجعية؟"
     },
     "manage_assets": {
       "asset_type": "نوع الأصل",
@@ -465,7 +528,8 @@
       },
       "activity_patterns": {
         "activity_by_hour": "النشاط حسب الساعة",
-        "activity_by_day": "النشاط حسب اليوم"
+        "activity_by_day": "النشاط حسب اليوم",
+        "busiest_around": "الأكثر نشاطًا حوالي {{hour}}"
       },
       "storage_breakdown": {
         "title": "تفصيل التخزين"
@@ -516,13 +580,12 @@
       "progress": "التقدّم",
       "status": {
         "pending": "معلّق",
-        "in_progress": "قيد التقدّم",
         "completed": "اكتمل",
         "failed": "فشل",
-        "processing": "جارٍ المعالجة",
         "staging": "التجهيز",
         "running": "قيد التشغيل",
-        "paused": "متوقف مؤقتًا"
+        "paused": "متوقف مؤقتًا",
+        "archived": "مؤرشف"
       },
       "badges": {
         "pending": "{{count}} معلّق",
@@ -559,7 +622,8 @@
         "no_results": "لم يتم العثور على نتائج لهذا الفلتر.",
         "view_bookmark": "عرض الإشارة المرجعية",
         "load_more": "تحميل المزيد",
-        "no_title": "لا يوجد عنوان"
+        "no_title": "لا يوجد عنوان",
+        "archived_results": "لم يعد يتم الاحتفاظ بنتائج الإشارات المرجعية الفردية لجلسات الاستيراد المؤرشفة."
       },
       "finalize_dialog_title": "إنهاء جلسة الاستيراد",
       "finalize_dialog_description": "هل تريد وضع \"{{name}}\" في قائمة الانتظار للمعالجة الخلفية؟ سيبدأ استيراد العلامات المرجعية المُجهزة.",
@@ -613,6 +677,19 @@
         "backup_queued": "تمت إضافة مهمة النسخ الاحتياطي إلى قائمة الانتظار! ستتم معالجتها قريبًا.",
         "backup_deleted": "تم حذف النسخة الاحتياطية!"
       }
+    },
+    "maintenance": {
+      "clear_filters": "مسح عوامل التصفية",
+      "clear_selection": "مسح التحديد",
+      "delete_selected": "حذف المحدد",
+      "try_again": "حاول مرة أخرى",
+      "sort": "ترتيب الفرز",
+      "no_matches": "لم يتم العثور على نتائج مطابقة",
+      "adjust_filters": "جرّب بحثًا مختلفًا أو امسح عوامل التصفية.",
+      "select_item": "تحديد {{name}}",
+      "selected": "{{count}} محدد",
+      "showing": "عرض {{shown}} من أصل {{total}}",
+      "load_more": "تحميل المزيد"
     }
   },
   "admin": {
@@ -625,18 +702,6 @@
     },
     "background_jobs": {
       "background_jobs": "المهام الخلفية",
-      "crawler_jobs": "مهام الاستكشاف",
-      "indexing_jobs": "مهام الفهرسة",
-      "inference_jobs": "مهام الاستدلال",
-      "tidy_assets_jobs": "مهام تنظيم الوسائط",
-      "job": "مهمة",
-      "queued": "في قائمة الانتظار",
-      "pending": "قيد الانتظار",
-      "failed": "فشلت",
-      "feed_jobs": "وظائف موجز RSS",
-      "video_jobs": "وظائف تنزيل الفيديو",
-      "webhook_jobs": "وظائف Webhook",
-      "asset_preprocessing_jobs": "وظائف المعالجة المسبقة للأصول",
       "jobs": {
         "crawler": {
           "title": "وظائف الزحف",
@@ -654,10 +719,6 @@
           "title": "وظائف المعالجة المسبقة للأصول",
           "description": "معالجة الصور والمستندات (لقطات الشاشة، واستخراج النصوص، إلخ.)"
         },
-        "tidy_assets": {
-          "title": "وظائف تنظيف الأصول",
-          "description": "تنظيف الأصول وتحسين التخزين"
-        },
         "video": {
           "title": "وظائف تنزيل الفيديو",
           "description": "استخراج الفيديو وتنزيله"
@@ -673,6 +734,10 @@
         "admin_maintenance": {
           "title": "مهام صيانة المسؤول",
           "description": "تنظيف إداري وصيانة للأصول"
+        },
+        "embeddings": {
+          "title": "وظائف التضمين",
+          "description": "توليد تضمين المتجهات للإشارات المرجعية"
         }
       },
       "monitor_and_manage": "مراقبة وإدارة قوائم انتظار الوظائف الخلفية ومهام معالجة النظام",
@@ -707,20 +772,11 @@
         "migrate_large_link_html_content": "نقل محتوى HTML كبير مضمّن إلى الأصول",
         "recrawl_pending_links_only": "إعادة فهرسة الروابط المعلّقة فقط",
         "regenerate_ai_tags_for_pending_bookmarks_only": "إعادة إنشاء وسوم الذكاء الاصطناعي للإشارات المرجعية المعلّقة فقط",
-        "regenerate_ai_summaries_for_pending_bookmarks_only": "إعادة إنشاء ملخصات الذكاء الاصطناعي للإشارات المرجعية المعلّقة فقط"
+        "regenerate_ai_summaries_for_pending_bookmarks_only": "إعادة إنشاء ملخصات الذكاء الاصطناعي للإشارات المرجعية المعلّقة فقط",
+        "regenerate_embeddings_for_pending_bookmarks_only": "إعادة توليد التضمينات للإشارات المرجعية المعلقة فقط",
+        "regenerate_embeddings_for_failed_bookmarks_only": "إعادة توليد التضمينات للإشارات المرجعية الفاشلة فقط",
+        "regenerate_embeddings_for_all_bookmarks": "إعادة توليد التضمينات لجميع الإشارات المرجعية"
       }
-    },
-    "actions": {
-      "recrawl_failed_links_only": "إعادة استكشاف الروابط الفاشلة فقط",
-      "recrawl_all_links": "إعادة استكشاف جميع الروابط",
-      "without_inference": "بدون استدلال",
-      "regenerate_ai_tags_for_failed_bookmarks_only": "إعادة إنشاء علامات الذكاء الاصطناعي للإشارات المرجعية الفاشلة فقط",
-      "regenerate_ai_tags_for_all_bookmarks": "إعادة إنشاء علامات الذكاء الاصطناعي لجميع الإشارات المرجعية",
-      "reindex_all_bookmarks": "إعادة فهرسة جميع الإشارات المرجعية",
-      "compact_assets": "ضغط الوسائط",
-      "reprocess_assets_fix_mode": "إعادة معالجة الوسائط (وضع الإصلاح)",
-      "regenerate_ai_summaries_for_failed_bookmarks_only": "أعد إنشاء ملخصات الذكاء الاصطناعي للإشارات المرجعية الفاشلة فقط",
-      "regenerate_ai_summaries_for_all_bookmarks": "أعد إنشاء ملخصات الذكاء الاصطناعي لجميع الإشارات المرجعية"
     },
     "users_list": {
       "users_list": "قائمة المستخدمين",
@@ -745,7 +801,8 @@
         "not_configured": "غير مهيأ",
         "connected": "متصل",
         "disconnected": "قطع الاتصال"
-      }
+      },
+      "vector_store": "مخزن المتجهات"
     },
     "admin_tools": {
       "admin_tools": "أدوات المشرف",
@@ -781,12 +838,17 @@
       "retag_queued": "تمت إضافة مهمة إعادة وضع العلامات إلى قائمة الانتظار",
       "resummarize_queued": "تمت إضافة مهمة إعادة التلخيص إلى قائمة الانتظار",
       "view": "عرض",
-      "fetch_error": "خطأ في جلب الإشارة المرجعية"
+      "fetch_error": "خطأ في جلب الإشارة المرجعية",
+      "embedding_status": "حالة التضمين",
+      "regenerate_embedding": "إعادة توليد التضمين",
+      "regenerate_embedding_queued": "تم وضع وظيفة إعادة توليد التضمين في قائمة الانتظار"
     }
   },
   "options": {
+    "theme": "السمة",
     "dark_mode": "الوضع الداكن",
     "light_mode": "الوضع الفاتح",
+    "system_mode": "وضع النظام",
     "apps_extensions": "التطبيقات والإضافات",
     "documentation": "الوثائق",
     "follow_us_on_x": "تابعنا على X"
@@ -881,12 +943,24 @@
       "shared": "مشترك",
       "private": "خاص"
     },
-    "summary_list_one": "{{count}} القوائم",
-    "summary_list_other": "{{count}} القوائم",
-    "summary_bookmark_one": "{{count}} الإشارات المرجعية",
-    "summary_bookmark_other": "{{count}} الإشارات المرجعية",
-    "items_count_one": "{{count}} عناصر",
-    "items_count_other": "{{count}} عناصر"
+    "summary_list_zero": "لا توجد قوائم",
+    "summary_list_one": "قائمة واحدة",
+    "summary_list_two": "قائمتان",
+    "summary_list_few": "{{count}} قوائم",
+    "summary_list_many": "{{count}} قائمة",
+    "summary_list_other": "{{count}} قائمة",
+    "summary_bookmark_zero": "لا توجد إشارات مرجعية",
+    "summary_bookmark_one": "إشارة مرجعية واحدة",
+    "summary_bookmark_two": "إشارتان مرجعيتان",
+    "summary_bookmark_few": "{{count}} إشارات مرجعية",
+    "summary_bookmark_many": "{{count}} إشارة مرجعية",
+    "summary_bookmark_other": "{{count}} إشارة مرجعية",
+    "items_count_zero": "لا توجد عناصر",
+    "items_count_one": "عنصر واحد",
+    "items_count_two": "عنصران",
+    "items_count_few": "{{count}} عناصر",
+    "items_count_many": "{{count}} عنصرًا",
+    "items_count_other": "{{count}} عنصر"
   },
   "tags": {
     "all_tags": "جميع الوسوم",
@@ -925,6 +999,10 @@
     "is_not_archived": "غير مؤرشف",
     "has_any_tag": "له أي وسم",
     "has_no_tags": "ليس له وسوم",
+    "has_notes": "يحتوي على ملاحظات",
+    "has_no_notes": "لا يحتوي على ملاحظات",
+    "has_highlights": "يحتوي على تمييزات",
+    "has_no_highlights": "لا يحتوي على تمييزات",
     "is_in_any_list": "في أي قائمة",
     "is_not_in_any_list": "ليس في أي قائمة",
     "created_on_or_after": "تم إنشاؤه في أو بعد",
@@ -965,12 +1043,26 @@
     "lists": "القوائم",
     "feeds": "خلاصات الأخبار",
     "is_from_source": "المصدر هو",
-    "is_not_from_source": "المصدر ليس"
+    "is_not_from_source": "المصدر ليس",
+    "mode_label": "وسيلة البحث",
+    "mode_label_description": "اختر كيف يجد Karakeep الإشارات المرجعية المطابقَة.",
+    "mode_keyword": "كلمة مفتاحية",
+    "mode_keyword_description": "مطابقة الكلمات الدقيقة في العناوين، والمحتوى، والروابط، والملحوظات. فوري تقريباً.",
+    "mode_hybrid": "هجين",
+    "mode_hybrid_description": "دمج المطابقات الدقيقة مع الأفكار ذات الصلة لتحقيق أفضل توازن. أبطأ من البحث بالكلمات المفتاحية.",
+    "mode_semantic": "دلالي",
+    "mode_semantic_description": "العثور على إشارات مرجعية متشابهة مفاهيمياً، حتى دون كلمات مشتركة. أبطأ من البحث بالكلمات المفتاحية.",
+    "keyword_placeholder": "البحث في العناوين، والنصوص، والروابط، والوسوم…",
+    "hybrid_placeholder": "البحث بالكلمات أو المعنى…",
+    "semantic_placeholder": "صف ما تتذكره…"
   },
   "preview": {
     "view_original": "عرض النسخة الأصلية",
     "cached_content": "النسخة المخزنة",
     "reader_view": "عرض القارئ",
+    "page_overview": "نظرة عامة على الصفحة",
+    "try_reader_view": "جرّب عرض القارئ",
+    "archived_page": "الصفحة المؤرشفة",
     "tabs": {
       "content": "المحتوى",
       "details": "التفاصيل"
@@ -984,7 +1076,6 @@
     "continue_button": "استمر"
   },
   "editor": {
-    "quickly_focus": "يمكنك التركيز سريعاً على هذا الحقل بالضغط على ⌘ + E",
     "multiple_urls_dialog_title": "هل تريد استيراد الروابط كإشارات مرجعية منفصلة؟",
     "multiple_urls_dialog_desc": "يحتوي المدخل على روابط متعددة في أسطر منفصلة. هل تريد استيرادها كإشارات مرجعية منفصلة؟",
     "import_as_text": "استيراد كإشارة مرجعية نصية",
@@ -1045,7 +1136,8 @@
   "dialogs": {
     "bookmarks": {
       "delete_confirmation_title": "حذف الإشارة المرجعية؟",
-      "delete_confirmation_description": "هل أنت متأكد من رغبتك في حذف هذه الإشارة المرجعية؟"
+      "delete_confirmation_description": "هل أنت متأكد من رغبتك في حذف هذه الإشارة المرجعية؟",
+      "bulk_delete_confirmation_description": "هل أنت متأكد من رغبتك في حذف {{count}} من الإشارات المرجعية؟"
     }
   },
   "toasts": {
@@ -1057,6 +1149,7 @@
       "delete_from_list": "تم حذف الإشارة المرجعية من القائمة",
       "clipboard_copied": "تم نسخ الرابط إلى الحافظة!",
       "preserve_pdf": "تم تشغيل حفظ PDF",
+      "preserve_video": "تم بدء تنزيل الفيديو",
       "update_banner": "تم تحديث البانر!",
       "uploading_banner": "جاري رفع البانر..."
     },
@@ -1166,5 +1259,28 @@
     "download": "تنزيل",
     "close": "إغلاق",
     "generating": "جارٍ الإنشاء..."
+  },
+  "keyboard_shortcuts": {
+    "title": "اختصارات لوحة المفاتيح",
+    "sections": {
+      "navigation": "التنقل",
+      "actions": "الإجراءات",
+      "selection": "التحديد",
+      "other": "أخرى"
+    },
+    "move_left": "تحريك لليسار",
+    "move_down": "تحريك للأسفل",
+    "move_up": "تحريك للأعلى",
+    "move_right": "تحريك لليمين",
+    "open_bookmark": "فتح الإشارة المرجعية",
+    "clear_focus": "إلغاء التركيز / إنهاء التحرير الجماعي",
+    "toggle_favorite": "تبديل المفضلة",
+    "toggle_archive": "أرشفة / إلغاء الأرشفة",
+    "delete_bookmark": "حذف الإشارة المرجعية",
+    "toggle_selection": "تبديل التحديد",
+    "select_all": "تحديد الكل",
+    "deselect_all": "إلغاء تحديد الكل",
+    "show_help": "إظهار اختصارات لوحة المفاتيح",
+    "focus_search_alt": "التركيز على البحث"
   }
 }

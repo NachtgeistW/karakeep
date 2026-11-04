@@ -1,6 +1,4 @@
 import { eq } from "drizzle-orm";
-import { workerStatsCounter } from "metrics";
-import { withWorkerEventLog, withWorkerTracing } from "workerTracing";
 
 import type { ZEmbeddingsRequest } from "@karakeep/shared-server";
 import { db } from "@karakeep/db";
@@ -12,7 +10,7 @@ import {
   zEmbeddingsRequestSchema,
 } from "@karakeep/shared-server";
 import serverConfig from "@karakeep/shared/config";
-import { InferenceClientFactory } from "@karakeep/shared/inference";
+import { EmbeddingClientFactory } from "@karakeep/shared/inference";
 import logger from "@karakeep/shared/logger";
 import {
   DequeuedJob,
@@ -24,6 +22,9 @@ import {
   getVectorStoreClient,
 } from "@karakeep/shared/vectorStore";
 import { Bookmark } from "@karakeep/trpc/models/bookmarks";
+
+import { workerStatsCounter } from "../metrics";
+import { withWorkerEventLog, withWorkerTracing } from "../workerTracing";
 
 const MAX_EMBEDDING_CONTENT_EXCERPT_LENGTH = 3000;
 const MAX_EMBEDDING_METADATA_LENGTH = 800;
@@ -425,10 +426,10 @@ async function runEmbed(
     "user.id": bookmark.userId,
   });
 
-  const inferenceClient = InferenceClientFactory.build();
-  if (!inferenceClient) {
+  const embeddingClient = EmbeddingClientFactory.build();
+  if (!embeddingClient) {
     logger.debug(
-      `[embeddings][${jobId}] No inference client configured, skipping embedding generation`,
+      `[embeddings][${jobId}] No embedding client configured, skipping embedding generation`,
     );
     if (shouldTag) {
       await enqueueTagging(bookmarkId, bookmark.userId, job.priority);
@@ -454,7 +455,7 @@ async function runEmbed(
     `[embeddings][${jobId}] Embedding text length: ${embeddingText.length} characters`,
   );
 
-  const embeddingResponse = await inferenceClient.generateEmbeddingFromText([
+  const embeddingResponse = await embeddingClient.generateEmbeddingFromText([
     embeddingText,
   ]);
 

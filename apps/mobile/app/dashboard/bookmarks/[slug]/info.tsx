@@ -13,11 +13,11 @@ import {
 } from "react-native-keyboard-controller";
 import * as Haptics from "expo-haptics";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import AttachmentBox from "@/components/bookmarks/AttachmentBox";
 import BookmarkTextMarkdown from "@/components/bookmarks/BookmarkTextMarkdown";
 import TagPill from "@/components/bookmarks/TagPill";
-import FullPageError from "@/components/FullPageError";
+import QueryPageState from "@/components/QueryPageState";
 import ChevronRight from "@/components/ui/ChevronRight";
-import FullPageSpinner from "@/components/ui/FullPageSpinner";
 import {
   GroupedSection,
   NavigationRow,
@@ -39,7 +39,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { useHeaderHeight } from "expo-router/react-navigation";
 
 import {
   useAutoRefreshingBookmarkQuery,
@@ -471,7 +471,7 @@ const ViewBookmarkPage = () => {
 
   const {
     data: bookmark,
-    isPending,
+    error,
     refetch,
   } = useAutoRefreshingBookmarkQuery({
     bookmarkId: slug,
@@ -495,14 +495,8 @@ const ViewBookmarkPage = () => {
     }
   };
 
-  if (isPending) {
-    return <FullPageSpinner />;
-  }
-
   if (!bookmark) {
-    return (
-      <FullPageError error="Bookmark not found" onRetry={() => refetch()} />
-    );
+    return <QueryPageState error={error} onRetry={() => refetch()} />;
   }
 
   const handleDeleteBookmark = () => {
@@ -589,21 +583,20 @@ const ViewBookmarkPage = () => {
           isPending={isEditPending}
           disabled={!isOwner}
         />
+        {isOwner && <BookmarkActionsSection bookmark={bookmark} />}
+        <AttachmentBox bookmark={bookmark} />
         {isOwner && (
-          <>
-            <BookmarkActionsSection bookmark={bookmark} />
-            <GroupedSection>
-              <Pressable
-                onPress={handleDeleteBookmark}
-                disabled={isDeletionPending}
-                className="items-center px-4 py-3 active:opacity-70"
-              >
-                <Text className="text-destructive" numberOfLines={1}>
-                  {isDeletionPending ? "Deleting..." : "Delete Bookmark"}
-                </Text>
-              </Pressable>
-            </GroupedSection>
-          </>
+          <GroupedSection>
+            <Pressable
+              onPress={handleDeleteBookmark}
+              disabled={isDeletionPending}
+              className="items-center px-4 py-3 active:opacity-70"
+            >
+              <Text className="text-destructive" numberOfLines={1}>
+                {isDeletionPending ? "Deleting..." : "Delete Bookmark"}
+              </Text>
+            </Pressable>
+          </GroupedSection>
         )}
         <View className="items-center gap-1 pt-2">
           <Text variant="caption1" color="tertiary" selectable>

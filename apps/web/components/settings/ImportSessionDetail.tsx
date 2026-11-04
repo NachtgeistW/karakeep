@@ -30,6 +30,7 @@ import { useTranslation } from "@/lib/i18n/client";
 import { formatDistanceToNow } from "date-fns";
 import {
   AlertCircle,
+  Archive,
   ArrowLeft,
   CheckCircle2,
   Clock,
@@ -84,6 +85,8 @@ function getStatusColor(status: string) {
       return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400";
     case "completed":
       return "bg-green-500/10 text-green-700 dark:text-green-400";
+    case "archived":
+      return "bg-muted text-muted-foreground";
     case "failed":
       return "bg-destructive/10 text-destructive";
     default:
@@ -103,6 +106,8 @@ function getStatusIcon(status: string) {
       return <Pause className="h-4 w-4" />;
     case "completed":
       return <CheckCircle2 className="h-4 w-4" />;
+    case "archived":
+      return <Archive className="h-4 w-4" />;
     case "failed":
       return <AlertCircle className="h-4 w-4" />;
     default:
@@ -249,7 +254,11 @@ export default function ImportSessionDetail({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useImportSessionResults(sessionId, filter);
+  } = useImportSessionResults(
+    sessionId,
+    filter,
+    !!stats && stats.status !== "archived",
+  );
 
   const deleteSession = useDeleteImportSession();
   const finalizeSession = useFinalizeImportStaging();
@@ -285,6 +294,7 @@ export default function ImportSessionDetail({
   const canDelete =
     stats.status === "staging" ||
     stats.status === "completed" ||
+    stats.status === "archived" ||
     stats.status === "failed" ||
     stats.status === "paused";
   const canFinalize = stats.status === "staging" && stats.totalBookmarks > 0;
@@ -299,6 +309,7 @@ export default function ImportSessionDetail({
       paused: t("settings.import_sessions.status.paused"),
       completed: t("settings.import_sessions.status.completed"),
       failed: t("settings.import_sessions.status.failed"),
+      archived: t("settings.import_sessions.status.archived"),
     });
 
   const handleDelete = () => {
@@ -319,7 +330,7 @@ export default function ImportSessionDetail({
       </Link>
 
       {/* Header */}
-      <div className="rounded-md border bg-background p-4">
+      <div className="rounded-md border bg-card p-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -428,7 +439,7 @@ export default function ImportSessionDetail({
                   }
                   disabled={pauseSession.isPending}
                 >
-                  <Pause className="mr-1 h-4 w-4" />
+                  <Pause className="h-4 w-4" />
                   {t("settings.import_sessions.pause_session")}
                 </Button>
               )}
@@ -460,7 +471,7 @@ export default function ImportSessionDetail({
                   )}
                 >
                   <Button size="sm" disabled={finalizeSession.isPending}>
-                    <Play className="mr-1 h-4 w-4" />
+                    <Play className="h-4 w-4" />
                     {t("settings.import_sessions.finalize_staging")}
                   </Button>
                 </ActionConfirmingDialog>
@@ -474,7 +485,7 @@ export default function ImportSessionDetail({
                   }
                   disabled={resumeSession.isPending}
                 >
-                  <Play className="mr-1 h-4 w-4" />
+                  <Play className="h-4 w-4" />
                   {t("settings.import_sessions.resume_session")}
                 </Button>
               )}
@@ -506,7 +517,7 @@ export default function ImportSessionDetail({
                     size="sm"
                     disabled={deleteSession.isPending}
                   >
-                    <Trash2 className="mr-1 h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                     {t("actions.delete")}
                   </Button>
                 </ActionConfirmingDialog>
@@ -517,11 +528,16 @@ export default function ImportSessionDetail({
       </div>
 
       {/* Filter tabs + Results table */}
-      <div className="rounded-md border bg-background p-4">
+      <div className="rounded-md border bg-card p-4">
+        {stats.status === "archived" && (
+          <p className="rounded-md bg-muted p-4 text-center text-sm text-muted-foreground">
+            {t("settings.import_sessions.detail.archived_results")}
+          </p>
+        )}
         <Tabs
           value={filter}
           onValueChange={(v) => setFilter(v as FilterType)}
-          className="w-full"
+          className={stats.status === "archived" ? "hidden" : "w-full"}
         >
           <TabsList className="mb-4 flex w-full flex-wrap">
             <TabsTrigger value="all">
@@ -541,8 +557,7 @@ export default function ImportSessionDetail({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-
-        {isResultsLoading ? (
+        {stats.status === "archived" ? null : isResultsLoading ? (
           <FullPageSpinner />
         ) : items.length === 0 ? (
           <p className="rounded-md bg-muted p-4 text-center text-sm text-muted-foreground">

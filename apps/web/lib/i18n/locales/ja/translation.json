@@ -1,6 +1,7 @@
 {
   "actions": {
     "add_to_list": "リストに追加",
+    "select": "選択",
     "apply_all": "全て適用",
     "create": "作成",
     "fetch_now": "フェッチする",
@@ -30,7 +31,6 @@
     "recrawl": "再クロール",
     "ignore": "無視する",
     "cancel": "キャンセル",
-    "download_full_page_archive": "全てのページアーカイブをダウンロード",
     "sort": {
       "title": "並び替え",
       "newest_first": "新しい順",
@@ -44,6 +44,7 @@
     "load_more": "もっと読み込む",
     "edit_notes": "注釈を編集",
     "preserve_as_pdf": "PDFとして保存する",
+    "preserve_video": "動画を保存",
     "offline_copies": "オフラインコピー",
     "preserve_offline_archive": "オフラインアーカイブを保存",
     "download_full_page_archive_file": "アーカイブファイルをダウンロード",
@@ -56,18 +57,6 @@
     "rename": "名前を変更"
   },
   "admin": {
-    "actions": {
-      "regenerate_ai_tags_for_failed_bookmarks_only": "失敗したブックマークのみの AI タグを再生成する",
-      "regenerate_ai_tags_for_all_bookmarks": "すべてのブックマークの AI タグを再生成",
-      "without_inference": "推論なし",
-      "reindex_all_bookmarks": "すべてのブックマークを再インデックスする",
-      "recrawl_failed_links_only": "失敗したリンクのみ再クロール",
-      "recrawl_all_links": "すべてのリンクを再クロール",
-      "compact_assets": "コンパクトアセット",
-      "reprocess_assets_fix_mode": "アセットの再処理（修正モード）",
-      "regenerate_ai_summaries_for_failed_bookmarks_only": "失敗したブックマークのみAI要約を再生成",
-      "regenerate_ai_summaries_for_all_bookmarks": "すべてのブックマークのAI要約を再生成"
-    },
     "server_stats": {
       "server_version": "サーバーバージョン",
       "server_stats": "サーバー統計情報",
@@ -75,19 +64,7 @@
       "total_users": "総ユーザ数"
     },
     "background_jobs": {
-      "job": "ジョブ",
-      "failed": "失敗",
       "background_jobs": "バックグラウンドジョブ",
-      "inference_jobs": "推論ジョブ",
-      "tidy_assets_jobs": "Tidy アセットジョブ",
-      "queued": "キュー",
-      "indexing_jobs": "インデックス作成ジョブ",
-      "crawler_jobs": "クローラージョブ",
-      "pending": "保留中",
-      "video_jobs": "動画ダウンロードジョブ",
-      "webhook_jobs": "Webhookジョブ",
-      "asset_preprocessing_jobs": "アセットのプリプロセスジョブ",
-      "feed_jobs": "RSSフィードジョブ",
       "jobs": {
         "crawler": {
           "title": "クローラーのジョブ",
@@ -101,13 +78,13 @@
           "title": "インデックスジョブ",
           "description": "検索インデックスの更新"
         },
+        "embeddings": {
+          "title": "埋め込みジョブ",
+          "description": "ブックマークのベクトル埋め込み生成"
+        },
         "asset_preprocessing": {
           "title": "アセットのプレ処理ジョブ",
           "description": "画像とドキュメントの前処理（スクリーンショット、テキスト抽出など）"
-        },
-        "tidy_assets": {
-          "title": "アセット整理ジョブ",
-          "description": "アセットのクリーンアップとストレージの最適化"
         },
         "video": {
           "title": "ビデオダウンロードジョブ",
@@ -158,7 +135,10 @@
         "migrate_large_link_html_content": "大規模なインラインHTMLコンテンツをアセットに移動",
         "recrawl_pending_links_only": "保留中のリンクのみを再クロールする",
         "regenerate_ai_tags_for_pending_bookmarks_only": "保留中のブックマークのみを対象にAIタグを再生成する",
-        "regenerate_ai_summaries_for_pending_bookmarks_only": "保留中のブックマークのみを対象にAI要約を再生成する"
+        "regenerate_ai_summaries_for_pending_bookmarks_only": "保留中のブックマークのみを対象にAI要約を再生成する",
+        "regenerate_embeddings_for_pending_bookmarks_only": "保留中のブックマークのみ埋め込みを再生成",
+        "regenerate_embeddings_for_failed_bookmarks_only": "失敗したブックマークのみ埋め込みを再生成",
+        "regenerate_embeddings_for_all_bookmarks": "すべてのブックマークの埋め込みを再生成"
       }
     },
     "admin_settings": "管理者設定",
@@ -181,6 +161,7 @@
       "search_engine": "検索エンジン",
       "browser": "ブラウザ",
       "queue_system": "キューシステム",
+      "vector_store": "ベクターストア",
       "status": {
         "not_configured": "未構成",
         "connected": "接続済み",
@@ -206,11 +187,13 @@
       "owner_user_id": "オーナーユーザーID",
       "tagging_status": "タギングステータス",
       "summarization_status": "要約ステータス",
+      "embedding_status": "埋め込みステータス",
       "crawl_status": "クロールステータス",
       "crawl_status_code": "HTTPステータスコード",
       "crawled_at": "クロール日時",
       "recrawl": "再クロール",
       "reindex": "再インデックス",
+      "regenerate_embedding": "埋め込みを再生成",
       "retag": "再タグ付け",
       "resummarize": "再要約",
       "bookmark_not_found": "ブックマークが見つかりません",
@@ -218,6 +201,7 @@
       "action_failed": "アクション失敗",
       "recrawl_queued": "再クロールジョブをキューに追加しました",
       "reindex_queued": "再インデックスジョブをキューに追加しました",
+      "regenerate_embedding_queued": "埋め込み再生成ジョブがキューに追加されました",
       "retag_queued": "再タグ付けジョブをキューに追加しました",
       "resummarize_queued": "再要約ジョブをキューに追加しました",
       "view": "表示",
@@ -438,6 +422,10 @@
           "users": {
             "label": "管理者: ユーザー",
             "description": "管理者用ユーザー管理にアクセスします。"
+          },
+          "subscriptions": {
+            "label": "管理: サブスクリプション",
+            "description": "ユーザーのサブスクリプションティアを管理します。"
           }
         }
       }
@@ -446,7 +434,45 @@
       "broken_links": "リンク切れ",
       "last_crawled_at": "最終クロール日時",
       "crawling_status": "クロールステータス",
-      "crawling_failed": "クロールに失敗しました"
+      "crawling_failed": "クロールに失敗しました",
+      "description": "取得できなかったリンクを確認し、再試行するか古いブックマークを削除します。",
+      "category_all": "要確認",
+      "category_blocked": "アクセスがブロックされました",
+      "category_missing": "見つかりません",
+      "category_errors": "その他のエラー",
+      "category_all_hint": "確認が必要なリンク",
+      "category_blocked_hint": "制限またはレート制限",
+      "category_missing_hint": "ページが存在しないか削除されました",
+      "category_errors_hint": "サーバーエラーまたはクロールの失敗",
+      "blocked_hint": "リクエストがブロックされても、リンク切れとは限りません。自動アクセスを制限しているサイトもあります。削除する前に元のページを開いて確認してください。",
+      "search": "タイトルまたはURLで検索…",
+      "sort_recent": "最近確認した順",
+      "sort_oldest": "確認が古い順",
+      "sort_domain": "ウェブサイト A–Z",
+      "result_count_other": "確認が必要なリンク {{count}} 件",
+      "retry_selected": "選択項目を再試行",
+      "empty": "リンク切れは見つかりませんでした",
+      "empty_description": "現在、クロールエラーが報告されている保存済みリンクはありません。",
+      "select_visible": "表示中のリンクをすべて選択",
+      "bookmark": "ブックマーク",
+      "issue": "問題",
+      "never_crawled": "クロール日時なし",
+      "issue_blocked": "アクセスがブロックされました",
+      "issue_missing": "見つかりません",
+      "issue_server": "サーバーエラー",
+      "issue_http": "HTTPエラー",
+      "issue_failed": "クロールに失敗しました",
+      "issue_blocked_hint": "サイトがこのリクエストを制限しました",
+      "issue_missing_hint": "ページが削除された可能性があります",
+      "issue_server_hint": "サイトがリクエストを完了できませんでした",
+      "issue_http_hint": "サイトが予期しない応答を返しました",
+      "issue_failed_hint": "成功した応答が記録されていません",
+      "queued": "キューに追加済み",
+      "queued_count_other": "{{count}} 件のリンクを再クロールのキューに追加しました。",
+      "deleted_count_other": "{{count}} 件のブックマークを削除しました。",
+      "action_failed": "{{total}} 件中 {{count}} 件が失敗しました。",
+      "delete_title_other": "{{count}} 件のブックマークを削除しますか？",
+      "delete_description": "選択したブックマークと、その保存済みファイル、ハイライト、ノートが完全に削除されます。この操作は元に戻せません。"
     },
     "back_to_app": "アプリに戻る",
     "user_settings": "ユーザ設定",
@@ -579,7 +605,8 @@
       },
       "activity_patterns": {
         "activity_by_hour": "時間ごとのアクティビティ",
-        "activity_by_day": "日ごとのアクティビティ"
+        "activity_by_day": "日ごとのアクティビティ",
+        "busiest_around": "最も活発な時間帯: {{hour}}"
       },
       "storage_breakdown": {
         "title": "ストレージの内訳"
@@ -630,13 +657,12 @@
       "progress": "進捗状況",
       "status": {
         "pending": "保留中",
-        "in_progress": "進行中",
         "completed": "完了",
         "failed": "失敗",
-        "processing": "処理中",
         "staging": "ステージング",
         "running": "実行中",
-        "paused": "一時停止"
+        "paused": "一時停止",
+        "archived": "アーカイブ済み"
       },
       "badges": {
         "pending": "{{count}} 件が保留中です",
@@ -673,7 +699,8 @@
         "no_results": "このフィルターに該当する結果はありません。",
         "view_bookmark": "ブックマークを見る",
         "load_more": "もっと読み込む",
-        "no_title": "タイトルなし"
+        "no_title": "タイトルなし",
+        "archived_results": "アーカイブされたインポートセッションでは、個別のブックマーク結果は保持されなくなります。"
       },
       "finalize_dialog_title": "インポートセッションを完了する",
       "finalize_dialog_description": "「{{name}}」をバックグラウンド処理のキューに追加しますか？ステージングされたブックマークのインポートが開始されます。",
@@ -727,6 +754,19 @@
         "backup_queued": "バックアップジョブがキューに追加されました。まもなく処理されます。",
         "backup_deleted": "バックアップは削除されました！"
       }
+    },
+    "maintenance": {
+      "clear_filters": "フィルターをクリア",
+      "clear_selection": "選択を解除",
+      "delete_selected": "選択項目を削除",
+      "try_again": "再試行",
+      "sort": "並び順",
+      "no_matches": "一致する項目が見つかりません",
+      "adjust_filters": "別の検索を試すか、フィルターをクリアしてください。",
+      "select_item": "{{name}} を選択",
+      "selected": "{{count}} 件選択中",
+      "showing": "{{total}} 件中 {{shown}} 件を表示",
+      "load_more": "さらに読み込む"
     }
   },
   "common": {
@@ -879,8 +919,10 @@
     "items_count_other": "{{count}} 個のアイテム"
   },
   "options": {
+    "theme": "テーマ",
     "dark_mode": "ダークモード",
     "light_mode": "ライトモード",
+    "system_mode": "システム設定",
     "apps_extensions": "アプリと拡張機能",
     "documentation": "ドキュメンテーション",
     "follow_us_on_x": "Xでフォローする"
@@ -923,6 +965,10 @@
     "type_is": "種類は",
     "has_any_tag": "いずれかのタグを持つ",
     "has_no_tags": "タグなし",
+    "has_notes": "ノートあり",
+    "has_no_notes": "ノートなし",
+    "has_highlights": "ハイライトあり",
+    "has_no_highlights": "ハイライトなし",
     "is_in_any_list": "いずれかのリストに入っている",
     "not_created_on_or_before": "以前に作成されていません",
     "url_contains": "URLに含む",
@@ -962,12 +1008,26 @@
     "lists": "リスト",
     "feeds": "フィード",
     "is_from_source": "ソースは",
-    "is_not_from_source": "ソースではない"
+    "is_not_from_source": "ソースではない",
+    "mode_label": "検索モード",
+    "mode_label_description": "Karakeepが一致するブックマークを見つける方法を選択します。",
+    "mode_keyword": "キーワード",
+    "mode_keyword_description": "タイトル、内容、URL、メモ内の正確な語句と一致させます。ほぼ瞬時に実行されます。",
+    "mode_hybrid": "ハイブリッド",
+    "mode_hybrid_description": "正確な一致と関連する概念を組み合わせ、最適なバランスを実現します。キーワード検索よりも低速です。",
+    "mode_semantic": "セマンティック",
+    "mode_semantic_description": "共通の単語がなくても、概念的に類似するブックマークを見つけます。キーワード検索よりも低速です。",
+    "keyword_placeholder": "タイトル、テキスト、URL、タグを検索…",
+    "hybrid_placeholder": "単語または意味で検索…",
+    "semantic_placeholder": "記憶に残っている内容を入力…"
   },
   "preview": {
     "cached_content": "キャッシュされたコンテンツ",
     "view_original": "オリジナルを見る",
     "reader_view": "リーダー表示",
+    "page_overview": "ページ概要",
+    "try_reader_view": "リーダー表示を試す",
+    "archived_page": "アーカイブされたページ",
     "tabs": {
       "content": "コンテンツ",
       "details": "詳細"
@@ -981,7 +1041,6 @@
     "continue_button": "続ける"
   },
   "editor": {
-    "quickly_focus": "⌘ + E を押すと、このフィールドにすばやくフォーカスできます",
     "multiple_urls_dialog_title": "URLを個別のブックマークとしてインポートしますか？",
     "import_as_text": "テキストブックマークとしてインポート",
     "import_as_separate_bookmarks": "別のブックマークとしてインポート",
@@ -1042,7 +1101,8 @@
   "dialogs": {
     "bookmarks": {
       "delete_confirmation_title": "ブックマークを削除する？",
-      "delete_confirmation_description": "このブックマークを削除してもよろしいですか？"
+      "delete_confirmation_description": "このブックマークを削除してもよろしいですか？",
+      "bulk_delete_confirmation_description": "{{count}} 個のブックマークを削除してもよろしいですか？"
     }
   },
   "toasts": {
@@ -1054,6 +1114,7 @@
       "deleted": "ブックマークが削除されました！",
       "refetch": "再取得をキューに追加しました！",
       "preserve_pdf": "PDF保存が開始されました",
+      "preserve_video": "動画のダウンロードが開始されました",
       "update_banner": "バナーが更新されました！",
       "uploading_banner": "バナーをアップロード中..."
     },
@@ -1166,5 +1227,28 @@
     "download": "ダウンロード",
     "close": "閉じる",
     "generating": "作成中..."
+  },
+  "keyboard_shortcuts": {
+    "title": "キーボードショートカット",
+    "sections": {
+      "navigation": "ナビゲーション",
+      "actions": "アクション",
+      "selection": "選択",
+      "other": "その他"
+    },
+    "move_left": "左へ移動",
+    "move_down": "下へ移動",
+    "move_up": "上へ移動",
+    "move_right": "右へ移動",
+    "open_bookmark": "ブックマークを開く",
+    "clear_focus": "フォーカスを解除 / 一括編集を終了",
+    "toggle_favorite": "お気に入りの切り替え",
+    "toggle_archive": "アーカイブ / アーカイブ解除",
+    "delete_bookmark": "ブックマークを削除",
+    "toggle_selection": "選択の切り替え",
+    "select_all": "すべて選択",
+    "deselect_all": "選択解除",
+    "show_help": "キーボードショートカットを表示",
+    "focus_search_alt": "検索にフォーカス"
   }
 }

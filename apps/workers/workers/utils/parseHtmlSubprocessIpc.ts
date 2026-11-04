@@ -1,9 +1,19 @@
 import { z } from "zod";
 
+import {
+  zReaderViewReasonSchema,
+  zReaderViewStatusSchema,
+} from "@karakeep/shared/types/bookmarks";
+
 export const parseSubprocessInputSchema = z.object({
-  htmlContent: z.string(),
+  // Path to a temp file containing the HTML to parse. The parent process
+  // owns this file and deletes it once the subprocess exits.
+  htmlPath: z.string(),
   url: z.string(),
   jobId: z.string(),
+  // When true, only run metadata extraction and skip the (expensive)
+  // readable-content extraction. `readableContent` will be null.
+  metadataOnly: z.boolean().optional(),
 });
 
 export const parseSubprocessMetadataSchema = z.looseObject({
@@ -20,6 +30,14 @@ export const parseSubprocessMetadataSchema = z.looseObject({
 export const parseSubprocessOutputSchema = z.object({
   metadata: parseSubprocessMetadataSchema,
   readableContent: z.object({ content: z.string() }).nullable(),
+  readerViewAssessment: z
+    .object({
+      status: zReaderViewStatusSchema,
+      score: z.number().int().min(0).max(100),
+      reasons: z.array(zReaderViewReasonSchema),
+      classifierVersion: z.number().int().positive(),
+    })
+    .nullable(),
 });
 
 export const parseSubprocessErrorSchema = z.object({

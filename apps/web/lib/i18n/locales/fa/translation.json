@@ -54,6 +54,7 @@
   "actions": {
     "change_layout": "تغییر چیدمان",
     "add_to_list": "افزودن به فهرست",
+    "select": "انتخاب",
     "delete": "حذف",
     "edit_tags": "ویرایش برچسب‌ها",
     "archive": "بایگانی",
@@ -70,7 +71,6 @@
     "toggle_show_archived": "نمایش موارد بایگانی‌شده",
     "refresh": "به‌روزرسانی",
     "confirm": "تأیید",
-    "download_full_page_archive": "دانلود نسخهٔ بایگانی کامل صفحه",
     "recrawl": "بازخزش",
     "close_bulk_edit": "بستن ویرایش گروهی",
     "create": "ایجاد",
@@ -96,6 +96,7 @@
     "load_more": "بارگذاری بیشتر",
     "edit_notes": "ویرایش یادداشت‌ها",
     "preserve_as_pdf": "نگهداری به عنوان پی‌دی‌اف",
+    "preserve_video": "نگهداری ویدئو",
     "offline_copies": "نسخه‌های آفلاین",
     "preserve_offline_archive": "حفظ بایگانی آفلاین",
     "download_full_page_archive_file": "دانلود فایل بایگانی",
@@ -152,7 +153,8 @@
       "failed_to_load": "بارگذاری آمار ناموفق بود",
       "activity_patterns": {
         "activity_by_hour": "فعالیت بر اساس ساعت",
-        "activity_by_day": "فعالیت بر اساس روز"
+        "activity_by_day": "فعالیت بر اساس روز",
+        "busiest_around": "بیشترین فعالیت حدود {{hour}}"
       },
       "storage_breakdown": {
         "title": "جزئیات مصرف فضا"
@@ -401,6 +403,10 @@
           "users": {
             "label": "مدیریت: کاربران",
             "description": "دسترسی به مدیریت کاربران اداری."
+          },
+          "subscriptions": {
+            "label": "مدیریت: اشتراک‌ها",
+            "description": "مدیریت سطوح اشتراک کاربران."
           }
         }
       }
@@ -409,7 +415,49 @@
       "crawling_status": "وضعیت خزیدن",
       "last_crawled_at": "آخرین زمان خزیدن",
       "broken_links": "لینک‌های خراب",
-      "crawling_failed": "خزیدن ناموفق بود"
+      "crawling_failed": "خزیدن ناموفق بود",
+      "description": "لینک‌هایی را که دریافت نشدند بررسی کنید، دوباره امتحان کنید یا نشانک‌های قدیمی را حذف کنید.",
+      "category_all": "نیازمند توجه",
+      "category_blocked": "دسترسی مسدود شده",
+      "category_missing": "یافت نشد",
+      "category_errors": "سایر خطاها",
+      "category_all_hint": "لینک‌هایی برای بررسی",
+      "category_blocked_hint": "محدود شده یا محدودیت نرخ درخواست",
+      "category_missing_hint": "صفحه وجود ندارد یا حذف شده است",
+      "category_errors_hint": "خطاهای سرور یا خزیدن",
+      "blocked_hint": "درخواست مسدودشده همیشه به معنای خراب بودن لینک نیست. برخی سایت‌ها دسترسی خودکار را محدود می‌کنند. پیش از حذف، صفحهٔ اصلی را باز کنید و بررسی کنید.",
+      "search": "جستجو بر اساس عنوان یا URL…",
+      "sort_recent": "اخیراً بررسی‌شده",
+      "sort_oldest": "قدیمی‌ترین بررسی ابتدا",
+      "sort_domain": "وب‌سایت A–Z",
+      "result_count_one": "{{count}} لینک برای بررسی",
+      "result_count_other": "{{count}} لینک برای بررسی",
+      "retry_selected": "تلاش دوباره برای موارد انتخاب‌شده",
+      "empty": "هیچ لینک خرابی یافت نشد",
+      "empty_description": "در حال حاضر هیچ‌یک از لینک‌های ذخیره‌شدهٔ شما خطای خزیدن گزارش‌شده‌ای ندارد.",
+      "select_visible": "انتخاب همهٔ لینک‌های قابل مشاهده",
+      "bookmark": "نشانک",
+      "issue": "مشکل",
+      "never_crawled": "بدون تاریخ خزیدن",
+      "issue_blocked": "دسترسی مسدود شده",
+      "issue_missing": "یافت نشد",
+      "issue_server": "خطای سرور",
+      "issue_http": "خطای HTTP",
+      "issue_failed": "خزیدن ناموفق بود",
+      "issue_blocked_hint": "سایت این درخواست را محدود کرد",
+      "issue_missing_hint": "ممکن است صفحه حذف شده باشد",
+      "issue_server_hint": "سایت نتوانست درخواست را کامل کند",
+      "issue_http_hint": "سایت پاسخ غیرمنتظره‌ای برگرداند",
+      "issue_failed_hint": "هیچ پاسخ موفقی ثبت نشد",
+      "queued": "در صف",
+      "queued_count_one": "{{count}} لینک برای خزیدن دوباره در صف قرار گرفت.",
+      "queued_count_other": "{{count}} لینک برای خزیدن دوباره در صف قرار گرفتند.",
+      "deleted_count_one": "{{count}} نشانک حذف شد.",
+      "deleted_count_other": "{{count}} نشانک حذف شدند.",
+      "action_failed": "{{count}} از {{total}} ناموفق بود.",
+      "delete_title_one": "{{count}} نشانک حذف شود؟",
+      "delete_title_other": "{{count}} نشانک حذف شوند؟",
+      "delete_description": "این کار نشانک‌های انتخاب‌شده را همراه با فایل‌های ذخیره‌شده، هایلایت‌ها و یادداشت‌هایشان برای همیشه حذف می‌کند. این عمل قابل بازگشت نیست."
     },
     "manage_assets": {
       "no_assets": "هنوز دارایی‌ای ندارید.",
@@ -513,13 +561,12 @@
       "progress": "پیشرفت",
       "status": {
         "pending": "در انتظار",
-        "in_progress": "در حال انجام",
         "completed": "تکمیل‌شده",
         "failed": "ناموفق",
-        "processing": "در حال پردازش",
         "staging": "در حال آماده سازی",
         "running": "در حال اجرا",
-        "paused": "متوقف شده"
+        "paused": "متوقف شده",
+        "archived": "آرشیو شده"
       },
       "badges": {
         "pending": "{{count}} مورد در انتظار",
@@ -556,7 +603,8 @@
         "no_results": "هیچ نتیجه‌ای برای این فیلتر یافت نشد.",
         "view_bookmark": "مشاهدهٔ نشانک",
         "load_more": "بارگذاری بیشتر",
-        "no_title": "بدون عنوان"
+        "no_title": "بدون عنوان",
+        "archived_results": "نتایج تک‌تک نشانک‌ها دیگر برای جلسات واردکردن آرشیو شده نگهداری نمی‌شوند."
       },
       "finalize_dialog_title": "نهایی‌سازی نشست واردات",
       "finalize_dialog_description": "صف‌بندی «{{name}}» برای پردازش پس‌زمینه؟ وارد کردن نشانک‌های آماده‌سازی شده آغاز خواهد شد.",
@@ -610,6 +658,19 @@
         "backup_queued": "وظیفه پشتیبان‌گیری در صف قرار گرفت! به زودی پردازش خواهد شد.",
         "backup_deleted": "پشتیبان حذف شد!"
       }
+    },
+    "maintenance": {
+      "clear_filters": "پاک کردن فیلترها",
+      "clear_selection": "پاک کردن انتخاب",
+      "delete_selected": "حذف موارد انتخاب‌شده",
+      "try_again": "تلاش دوباره",
+      "sort": "ترتیب مرتب‌سازی",
+      "no_matches": "موردی یافت نشد",
+      "adjust_filters": "جستجوی دیگری را امتحان کنید یا فیلترها را پاک کنید.",
+      "select_item": "انتخاب {{name}}",
+      "selected": "{{count}} انتخاب‌شده",
+      "showing": "نمایش {{shown}} از {{total}}",
+      "load_more": "بارگذاری بیشتر"
     }
   },
   "highlights": {
@@ -633,7 +694,8 @@
         "not_configured": "پیکربندی نشده",
         "connected": "متصل شد",
         "disconnected": "قطع شده"
-      }
+      },
+      "vector_store": "ذخیره‌ساز برداری"
     },
     "background_jobs": {
       "jobs": {
@@ -653,10 +715,6 @@
           "title": "وظایف پیش پردازش دارایی",
           "description": "پیش‌پردازش تصویر و سند (اسکرین‌شات، استخراج متن و …)"
         },
-        "tidy_assets": {
-          "title": "وظایف دارایی های مرتب",
-          "description": "پاکسازی دارایی و بهینه سازی ذخیره سازی"
-        },
         "video": {
           "title": "وظایف دانلود ویدیو",
           "description": "استخراج و دانلود ویدیو"
@@ -672,6 +730,10 @@
         "admin_maintenance": {
           "title": "کارهای تعمیر و نگهداری ادمین",
           "description": "پاکسازی مدیریتی و نگهداری دارایی"
+        },
+        "embeddings": {
+          "title": "کارهای جاسازی",
+          "description": "تولیدِ جاسازی برداری برای نشانک"
         }
       },
       "background_jobs": "وظایف پس زمینه",
@@ -706,7 +768,10 @@
         "migrate_large_link_html_content": "انتقال محتوای بزرگ HTML درون‌خطی به دارایی‌ها",
         "recrawl_pending_links_only": "بازخزش فقط لینک‌های در انتظار",
         "regenerate_ai_tags_for_pending_bookmarks_only": "تولید مجدد برچسب‌های هوش مصنوعی فقط برای نشانک‌های در انتظار",
-        "regenerate_ai_summaries_for_pending_bookmarks_only": "تولید مجدد خلاصه‌های هوش مصنوعی فقط برای نشانک‌های در انتظار"
+        "regenerate_ai_summaries_for_pending_bookmarks_only": "تولید مجدد خلاصه‌های هوش مصنوعی فقط برای نشانک‌های در انتظار",
+        "regenerate_embeddings_for_pending_bookmarks_only": "بازتولید جاسازی‌ها فقط برای نشانک‌های در انتظار",
+        "regenerate_embeddings_for_failed_bookmarks_only": "بازتولید جاسازی‌ها فقط برای نشانک‌های ناموفق",
+        "regenerate_embeddings_for_all_bookmarks": "بازتولید جاسازی‌ها برای همه نشانک‌ها"
       },
       "available_actions": "اقدامات موجود"
     },
@@ -757,12 +822,17 @@
       "retag_queued": "وظیفه برچسب‌گذاری مجدد در صف قرار گرفته است",
       "resummarize_queued": "وظیفه خلاصه‌سازی مجدد در صف قرار گرفته است",
       "view": "مشاهده",
-      "fetch_error": "خطا در دریافت نشانک"
+      "fetch_error": "خطا در دریافت نشانک",
+      "embedding_status": "وضعیت جاسازی",
+      "regenerate_embedding": "بازتولید جاسازی",
+      "regenerate_embedding_queued": "فرآیند بازتولید جاسازی در صف قرار گرفت"
     }
   },
   "options": {
+    "theme": "پوسته",
     "dark_mode": "حالت تیره",
     "light_mode": "حالت روشن",
+    "system_mode": "حالت سیستم",
     "apps_extensions": "برنامه‌ها و افزونه‌ها",
     "documentation": "مستندات",
     "follow_us_on_x": "ما را در X دنبال کنید"
@@ -857,10 +927,10 @@
       "shared": "اشتراک‌گذاری شده",
       "private": "خصوصی"
     },
-    "summary_list_one": "{{count}} فهرست‌ها",
-    "summary_list_other": "{{count}} فهرست‌ها",
-    "summary_bookmark_one": "{{count}} نشانک‌ها",
-    "summary_bookmark_other": "{{count}} نشانک‌ها",
+    "summary_list_one": "{{count}} فهرست",
+    "summary_list_other": "{{count}} فهرست",
+    "summary_bookmark_one": "{{count}} نشانک",
+    "summary_bookmark_other": "{{count}} نشانک",
     "items_count_one": "{{count}} مورد",
     "items_count_other": "{{count}} مورد"
   },
@@ -901,6 +971,10 @@
     "is_not_archived": "بایگانی نشده",
     "has_any_tag": "برچسبی دارد",
     "has_no_tags": "هیچ برچسبی ندارد",
+    "has_notes": "یادداشت دارد",
+    "has_no_notes": "یادداشت ندارد",
+    "has_highlights": "هایلایت دارد",
+    "has_no_highlights": "هایلایت ندارد",
     "is_in_any_list": "در فهرستی قرار دارد",
     "is_not_in_any_list": "در هیچ فهرستی نیست",
     "created_on_or_after": "ایجاد شده در یا بعد از",
@@ -941,12 +1015,26 @@
     "lists": "فهرست‌ها",
     "feeds": "فیدها",
     "is_from_source": "از منبع است",
-    "is_not_from_source": "از منبع نیست"
+    "is_not_from_source": "از منبع نیست",
+    "mode_label": "حالت جستجو",
+    "mode_label_description": "نحوه یافتن نشانک‌های منطبق توسط Karakeep را انتخاب کنید.",
+    "mode_keyword": "کلمه کلیدی",
+    "mode_keyword_description": "انطباق دقیق کلمات در عناوین، محتوا، نشانی‌ها و یادداشت‌ها. تقریباً فوری.",
+    "mode_hybrid": "ترکیبی (Hybrid)",
+    "mode_hybrid_description": "ترکیب انطباقات دقیق با ایده‌های مرتبط برای ایجاد بهترین تعادل. کندتر از جستجوی کلمه کلیدی.",
+    "mode_semantic": "معنایی (Semantic)",
+    "mode_semantic_description": "یافتن نشانک‌های مفهومی مشابه، حتی بدون کلمات مشترک. کندتر از جستجوی کلمه کلیدی.",
+    "keyword_placeholder": "جستجو در عناوین، متون، نشانی‌ها و برچسب‌ها…",
+    "hybrid_placeholder": "جستجو بر اساس کلمات یا معنا…",
+    "semantic_placeholder": "آنچه را که به یاد دارید توصیف کنید…"
   },
   "preview": {
     "view_original": "مشاهدهٔ اصلی",
     "cached_content": "محتوای ذخیره شده",
     "reader_view": "نمای خواننده",
+    "page_overview": "نمای کلی صفحه",
+    "try_reader_view": "نمای خواننده را امتحان کنید",
+    "archived_page": "صفحهٔ بایگانی‌شده",
     "tabs": {
       "content": "محتوا",
       "details": "جزئیات"
@@ -960,7 +1048,6 @@
     "continue_button": "ادامه"
   },
   "editor": {
-    "quickly_focus": "با فشردن ⌘ + E می‌توانید به سرعت روی این فیلد تمرکز کنید",
     "multiple_urls_dialog_title": "آیا می‌خواهید آدرس‌های اینترنتی را به عنوان نشانک‌های جداگانه وارد کنید؟",
     "multiple_urls_dialog_desc": "ورودی شامل چندین آدرس اینترنتی در خطوط جداگانه است. آیا می‌خواهید آن‌ها را به عنوان نشانک‌های جداگانه وارد کنید؟",
     "import_as_text": "درون‌ریزی به‌عنوان نشانک متنی",
@@ -1021,7 +1108,8 @@
   "dialogs": {
     "bookmarks": {
       "delete_confirmation_title": "حذف نشانک؟",
-      "delete_confirmation_description": "آیا مطمئن هستید که می‌خواهید این نشانک را حذف کنید؟"
+      "delete_confirmation_description": "آیا مطمئن هستید که می‌خواهید این نشانک را حذف کنید؟",
+      "bulk_delete_confirmation_description": "آیا مطمئن هستید که می‌خواهید {{count}} نشانک را پاک کنید؟"
     }
   },
   "toasts": {
@@ -1033,6 +1121,7 @@
       "delete_from_list": "نشانک از فهرست حذف شد",
       "clipboard_copied": "لینک به کلیپ‌بورد شما اضافه شد!",
       "preserve_pdf": "نگهداری پی‌دی‌اف فعال شده‌است",
+      "preserve_video": "دانلود ویدئو آغاز شد",
       "update_banner": "بنر به روز شد!",
       "uploading_banner": "بارگذاری بنر..."
     },
@@ -1142,5 +1231,28 @@
     "download": "بارگیری",
     "close": "بستن",
     "generating": "درحال تولید..."
+  },
+  "keyboard_shortcuts": {
+    "title": "میان‌برهای صفحه‌کلید",
+    "sections": {
+      "navigation": "ناوبری",
+      "actions": "عملیات‌ها",
+      "selection": "انتخاب",
+      "other": "سایر"
+    },
+    "move_left": "انتقال به چپ",
+    "move_down": "انتقال به پایین",
+    "move_up": "انتقال به بالا",
+    "move_right": "انتقال به راست",
+    "open_bookmark": "باز کردن نشانک",
+    "clear_focus": "پاک کردن تمرکز / خروج از ویرایش دسته‌جمعی",
+    "toggle_favorite": "تغییر وضعیت علاقه‌مندی",
+    "toggle_archive": "بایگانی / بازگردانی از بایگانی",
+    "delete_bookmark": "حذف نشانک",
+    "toggle_selection": "تغییر وضعیت انتخاب",
+    "select_all": "انتخاب همه",
+    "deselect_all": "لغو انتخاب همه",
+    "show_help": "نمایش میان‌برهای صفحه‌کلید",
+    "focus_search_alt": "تمرکز روی جستجو"
   }
 }

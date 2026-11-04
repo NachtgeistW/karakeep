@@ -1,9 +1,15 @@
-import { count, sum } from "drizzle-orm";
+import { count, eq, isNotNull, or, sql, sum } from "drizzle-orm";
 import { Counter, Gauge, Histogram, register } from "prom-client";
 import type { Metric } from "prom-client";
 
 import { db } from "@karakeep/db";
-import { assets, bookmarks, subscriptions, users } from "@karakeep/db/schema";
+import {
+  assets,
+  bookmarks,
+  inAppSubscriptions,
+  subscriptions,
+  users,
+} from "@karakeep/db/schema";
 import {
   AdminMaintenanceQueue,
   AssetPreprocessingQueue,
@@ -104,32 +110,83 @@ const totalUsersGauge = getOrCreateMetric(
 );
 
 if (serverConfig.stripe.isConfigured) {
+  const subscriptionStatus = sql<string>`coalesce(${subscriptions.status}, 'none')`;
+  const subscriptionTier = sql<string>`
+    case
+      when ${users.manualTierName} is not null then ${users.manualTierName}
+      else coalesce(${subscriptions.tier}, 'free')
+    end
+  `;
   getOrCreateMetric(
     "karakeep_subscription_status",
     () =>
       new Gauge({
         name: "karakeep_subscription_status",
-        help: "Total number of subscriptions per status",
+        help: "Total number of users per subscription status and tier",
         labelNames: ["status", "tier"],
         async collect() {
           this.reset();
           try {
             const results = await db
               .select({
-                status: subscriptions.status,
-                tier: subscriptions.tier,
+                status: subscriptionStatus,
+                tier: subscriptionTier,
                 count: count(),
               })
-              .from(subscriptions)
-              .groupBy(subscriptions.status, subscriptions.tier);
+              .from(users)
+              .leftJoin(subscriptions, eq(subscriptions.userId, users.id))
+              .where(
+                or(
+                  isNotNull(subscriptions.id),
+                  isNotNull(users.manualTierName),
+                ),
+              )
+              .groupBy(subscriptionStatus, subscriptionTier);
             for (const result of results) {
               this.set(
-                { status: result.status, tier: result.tier },
+                {
+                  status: result.status,
+                  tier: result.tier,
+                },
                 result.count,
               );
             }
           } catch (error) {
             console.error("Failed to get subscription status:", error);
+          }
+        },
+      }),
+  );
+}
+
+if (serverConfig.revenueCat.isConfigured) {
+  const store = sql<string>`coalesce(${inAppSubscriptions.store}, 'unknown')`;
+  getOrCreateMetric(
+    "karakeep_in_app_subscription_status",
+    () =>
+      new Gauge({
+        name: "karakeep_in_app_subscription_status",
+        help: "Total number of users per in-app subscription status and store",
+        labelNames: ["status", "store"],
+        async collect() {
+          this.reset();
+          try {
+            const results = await db
+              .select({
+                status: inAppSubscriptions.status,
+                store,
+                count: count(),
+              })
+              .from(inAppSubscriptions)
+              .groupBy(inAppSubscriptions.status, store);
+            for (const result of results) {
+              this.set(
+                { status: result.status, store: result.store },
+                result.count,
+              );
+            }
+          } catch (error) {
+            console.error("Failed to get in-app subscription status:", error);
           }
         },
       }),

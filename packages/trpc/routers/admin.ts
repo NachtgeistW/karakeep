@@ -1,9 +1,17 @@
 import * as dns from "dns";
 import { TRPCError } from "@trpc/server";
-import { and, asc, count, eq, gt, inArray, or, sum } from "drizzle-orm";
+import { and, asc, count, eq, gt, gte, inArray, or, sum } from "drizzle-orm";
 import { z } from "zod";
 
-import { assets, bookmarkLinks, bookmarks, users } from "@karakeep/db/schema";
+import {
+  assets,
+  bookmarkAssets,
+  bookmarkLinks,
+  bookmarks,
+  sessions,
+  subscriptions,
+  users,
+} from "@karakeep/db/schema";
 import {
   AdminMaintenanceQueue,
   AssetPreprocessingQueue,
@@ -18,7 +26,7 @@ import {
   triggerSearchReindex,
   VideoWorkerQueue,
   WebhookQueue,
-  zAdminMaintenanceTaskSchema,
+  zSystemAdminMaintenanceTaskSchema,
 } from "@karakeep/shared-server";
 import serverConfig from "@karakeep/shared/config";
 import logger from "@karakeep/shared/logger";
@@ -28,19 +36,33 @@ import {
   resetPasswordSchema,
   updateUserSchema,
   zAdminCreateUserSchema,
+  zAdminGetUserSchema,
+  zAdminUserSchema,
+  zAdminJobModifiedWithinSecondsSchema,
 } from "@karakeep/shared/types/admin";
 import { BookmarkTypes } from "@karakeep/shared/types/bookmarks";
+import { setUrlHostnameFromResolvedAddress } from "@karakeep/shared/utils/url";
 import { getVectorStoreClient } from "@karakeep/shared/vectorStore";
 
-import { generatePasswordSalt, hashPassword } from "../auth";
+import { setUserPassword } from "../auth";
 import { createAdminScopedProcedure, router } from "../index";
 import { Bookmark } from "../models/bookmarks";
 import { User } from "../models/users";
+import { syncStripeDataToDatabase } from "./subscriptions";
 
 const adminBookmarksProcedure = createAdminScopedProcedure("bookmarks");
 const adminJobsProcedure = createAdminScopedProcedure("jobs");
 const adminSystemProcedure = createAdminScopedProcedure("system");
 const adminUsersProcedure = createAdminScopedProcedure("users");
+
+function modifiedWithin(modifiedWithinSeconds?: number) {
+  return modifiedWithinSeconds === undefined
+    ? undefined
+    : gte(
+        bookmarks.modifiedAt,
+        new Date(Date.now() - modifiedWithinSeconds * 1000),
+      );
+}
 
 export const adminAppRouter = router({
   stats: adminSystemProcedure
@@ -248,17 +270,22 @@ export const adminAppRouter = router({
       z.object({
         crawlStatus: z.enum(["success", "failure", "pending", "all"]),
         runInference: z.boolean(),
+        modifiedWithinSeconds: zAdminJobModifiedWithinSecondsSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const bookmarkIds = await ctx.db.query.bookmarkLinks.findMany({
-        columns: {
-          id: true,
-        },
-        ...(input.crawlStatus === "all"
-          ? {}
-          : { where: eq(bookmarkLinks.crawlStatus, input.crawlStatus) }),
-      });
+      const bookmarkIds = await ctx.db
+        .select({ id: bookmarkLinks.id })
+        .from(bookmarkLinks)
+        .innerJoin(bookmarks, eq(bookmarkLinks.id, bookmarks.id))
+        .where(
+          and(
+            input.crawlStatus === "all"
+              ? undefined
+              : eq(bookmarkLinks.crawlStatus, input.crawlStatus),
+            modifiedWithin(input.modifiedWithinSeconds),
+          ),
+        );
 
       await Promise.all(
         bookmarkIds.map((b) => {
@@ -273,36 +300,49 @@ export const adminAppRouter = router({
         }),
       );
     }),
-  reindexAllBookmarks: adminBookmarksProcedure.mutation(async ({ ctx }) => {
-    const searchIdx = await getSearchClient();
-    await searchIdx?.clearIndex();
-    const bookmarkIds = await ctx.db.query.bookmarks.findMany({
-      columns: {
-        id: true,
-      },
-    });
+  reindexAllBookmarks: adminBookmarksProcedure
+    .input(
+      z
+        .object({
+          modifiedWithinSeconds:
+            zAdminJobModifiedWithinSecondsSchema.optional(),
+        })
+        .optional(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input?.modifiedWithinSeconds === undefined) {
+        const searchIdx = await getSearchClient();
+        await searchIdx?.clearIndex();
+      }
+      const bookmarkIds = await ctx.db
+        .select({ id: bookmarks.id })
+        .from(bookmarks)
+        .where(modifiedWithin(input?.modifiedWithinSeconds));
 
-    await Promise.all(
-      bookmarkIds.map((b) =>
-        triggerSearchReindex(b.id, {
-          priority: QueuePriority.Low,
-        }),
-      ),
-    );
-  }),
+      await Promise.all(
+        bookmarkIds.map((b) =>
+          triggerSearchReindex(b.id, {
+            priority: QueuePriority.Low,
+          }),
+        ),
+      );
+    }),
   regenerateAllBookmarkEmbeddings: adminBookmarksProcedure
     .input(
       z
         .object({
           status: z.enum(["failure", "pending", "all"]).default("all"),
+          modifiedWithinSeconds:
+            zAdminJobModifiedWithinSecondsSchema.optional(),
         })
         .optional(),
     )
     .mutation(async ({ ctx, input }) => {
       const status = input?.status ?? "all";
+      const modifiedAtFilter = modifiedWithin(input?.modifiedWithinSeconds);
 
-      const vectorStore = await getVectorStoreClient();
-      if (status === "all") {
+      if (status === "all" && input?.modifiedWithinSeconds === undefined) {
+        const vectorStore = await getVectorStoreClient();
         await vectorStore?.clearIndex();
       }
 
@@ -321,6 +361,7 @@ export const adminAppRouter = router({
               status === "all"
                 ? undefined
                 : eq(bookmarks.embeddingStatus, status),
+              modifiedAtFilter,
               cursor ? gt(bookmarks.id, cursor) : undefined,
             ),
           )
@@ -361,50 +402,58 @@ export const adminAppRouter = router({
         }
       }
     }),
-  reprocessAssetsFixMode: adminBookmarksProcedure.mutation(async ({ ctx }) => {
-    const bookmarkIds = await ctx.db.query.bookmarkAssets.findMany({
-      columns: {
-        id: true,
-      },
-    });
+  reprocessAssetsFixMode: adminBookmarksProcedure
+    .input(
+      z
+        .object({
+          modifiedWithinSeconds:
+            zAdminJobModifiedWithinSecondsSchema.optional(),
+        })
+        .optional(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const bookmarkIds = await ctx.db
+        .select({ id: bookmarkAssets.id })
+        .from(bookmarkAssets)
+        .innerJoin(bookmarks, eq(bookmarkAssets.id, bookmarks.id))
+        .where(modifiedWithin(input?.modifiedWithinSeconds));
 
-    await Promise.all(
-      bookmarkIds.map((b) =>
-        AssetPreprocessingQueue.enqueue(
-          {
-            bookmarkId: b.id,
-            fixMode: true,
-          },
-          {
-            priority: QueuePriority.Low,
-          },
+      await Promise.all(
+        bookmarkIds.map((b) =>
+          AssetPreprocessingQueue.enqueue(
+            {
+              bookmarkId: b.id,
+              fixMode: true,
+            },
+            {
+              priority: QueuePriority.Low,
+            },
+          ),
         ),
-      ),
-    );
-  }),
+      );
+    }),
   reRunInferenceOnAllBookmarks: adminBookmarksProcedure
     .input(
       z.object({
         type: z.enum(["tag", "summarize"]),
         status: z.enum(["success", "failure", "pending", "all"]),
+        modifiedWithinSeconds: zAdminJobModifiedWithinSecondsSchema.optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const bookmarkIds = await ctx.db.query.bookmarks.findMany({
-        columns: {
-          id: true,
-        },
-        ...{
-          tag:
-            input.status === "all"
-              ? {}
-              : { where: eq(bookmarks.taggingStatus, input.status) },
-          summarize:
-            input.status === "all"
-              ? {}
-              : { where: eq(bookmarks.summarizationStatus, input.status) },
-        }[input.type],
-      });
+      const statusFilter =
+        input.status === "all"
+          ? undefined
+          : eq(
+              input.type === "tag"
+                ? bookmarks.taggingStatus
+                : bookmarks.summarizationStatus,
+              input.status,
+            );
+      const bookmarkIds = await ctx.db
+        .select({ id: bookmarks.id })
+        .from(bookmarks)
+        .where(and(statusFilter, modifiedWithin(input.modifiedWithinSeconds)));
 
       await Promise.all(
         bookmarkIds.map((b) =>
@@ -418,7 +467,7 @@ export const adminAppRouter = router({
       );
     }),
   runAdminMaintenanceTask: adminJobsProcedure
-    .input(zAdminMaintenanceTaskSchema)
+    .input(zSystemAdminMaintenanceTaskSchema)
     .mutation(async ({ input }) => {
       await AdminMaintenanceQueue.enqueue(input);
     }),
@@ -464,6 +513,30 @@ export const adminAppRouter = router({
 
       return results;
     }),
+  getUser: adminUsersProcedure
+    .input(zAdminGetUserSchema)
+    .output(zAdminUserSchema)
+    .query(async ({ input, ctx }) => {
+      const user = await ctx.db.query.users.findFirst({
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          bookmarkQuota: true,
+          storageQuota: true,
+        },
+        where:
+          "id" in input ? eq(users.id, input.id) : eq(users.email, input.email),
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+      return user;
+    }),
   createUser: adminUsersProcedure
     .input(zAdminCreateUserSchema)
     .output(
@@ -475,7 +548,14 @@ export const adminAppRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      return await User.create(ctx, input, input.role);
+      // Users created by an admin don't need to verify their email.
+      return await User.createRaw(ctx.db, {
+        name: input.name,
+        email: input.email,
+        password: input.password,
+        role: input.role,
+        emailVerified: true,
+      });
     }),
   updateUser: adminUsersProcedure
     .input(updateUserSchema)
@@ -533,19 +613,75 @@ export const adminAppRouter = router({
           message: "Cannot reset own password",
         });
       }
-      const newSalt = generatePasswordSalt();
-      const hashedPassword = await hashPassword(input.newPassword, newSalt);
-      const result = await ctx.db
-        .update(users)
-        .set({ password: hashedPassword, salt: newSalt })
-        .where(eq(users.id, input.userId));
-
-      if (result.changes == 0) {
+      const user = await ctx.db.query.users.findFirst({
+        columns: { id: true },
+        where: eq(users.id, input.userId),
+      });
+      if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
         });
       }
+      await setUserPassword(ctx.db, user.id, input.newPassword);
+      // Someone else might know the old password, so sign the user out
+      // everywhere.
+      await ctx.db.delete(sessions).where(eq(sessions.userId, user.id));
+    }),
+  purgeBookmarksOverQuota: adminUsersProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        dryRun: z.boolean().optional().default(false),
+      }),
+    )
+    .output(
+      z.object({
+        numBookmarks: z.number(),
+        bookmarkQuota: z.number(),
+        numBookmarksToDelete: z.number(),
+        enqueued: z.boolean(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.userId),
+        columns: { bookmarkQuota: true },
+      });
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+      if (user.bookmarkQuota === null) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User doesn't have a bookmark quota",
+        });
+      }
+      const [{ numBookmarks }] = await ctx.db
+        .select({ numBookmarks: count() })
+        .from(bookmarks)
+        .where(eq(bookmarks.userId, input.userId));
+      const numBookmarksToDelete = Math.max(
+        0,
+        numBookmarks - user.bookmarkQuota,
+      );
+
+      const enqueued = !input.dryRun && numBookmarksToDelete > 0;
+      if (enqueued) {
+        await AdminMaintenanceQueue.enqueue({
+          type: "purge_bookmarks_over_quota",
+          args: { userId: input.userId },
+        });
+      }
+      return {
+        numBookmarks,
+        bookmarkQuota: user.bookmarkQuota,
+        numBookmarksToDelete,
+        enqueued,
+      };
     }),
   getAdminNoticies: adminSystemProcedure
     .output(
@@ -614,38 +750,45 @@ export const adminAppRouter = router({
         error?: string;
       } = { configured: false, connected: false };
 
-      const searchClient = await getSearchClient();
-      searchEngineStatus.configured = searchClient !== null;
-
-      if (searchClient) {
-        const pluginName = PluginManager.getPluginName(PluginType.Search);
-        if (pluginName) {
-          searchEngineStatus.pluginName = pluginName;
-        }
-        try {
+      // Resolving a client can itself throw (the provider connects lazily on
+      // first use), so it has to be inside the try as well -- otherwise one
+      // unreachable backend takes down this whole endpoint instead of just
+      // reporting itself as disconnected.
+      const searchPluginName = PluginManager.getPluginName(PluginType.Search);
+      if (searchPluginName) {
+        searchEngineStatus.pluginName = searchPluginName;
+      }
+      try {
+        const searchClient = await getSearchClient();
+        searchEngineStatus.configured = searchClient !== null;
+        if (searchClient) {
           await searchClient.search({ query: "", limit: 1 });
           searchEngineStatus.connected = true;
-        } catch (error) {
-          searchEngineStatus.error =
-            error instanceof Error ? error.message : "Unknown error";
         }
+      } catch (error) {
+        // A provider is registered (that's the only way getClient can throw),
+        // so it is configured -- it just can't be reached right now.
+        searchEngineStatus.configured = true;
+        searchEngineStatus.error =
+          error instanceof Error ? error.message : "Unknown error";
       }
 
-      const vectorStoreClient = await getVectorStoreClient();
-      vectorStoreStatus.configured = vectorStoreClient !== null;
-
-      if (vectorStoreClient) {
-        const pluginName = PluginManager.getPluginName(PluginType.VectorStore);
-        if (pluginName) {
-          vectorStoreStatus.pluginName = pluginName;
-        }
-
-        try {
+      const vectorStorePluginName = PluginManager.getPluginName(
+        PluginType.VectorStore,
+      );
+      if (vectorStorePluginName) {
+        vectorStoreStatus.pluginName = vectorStorePluginName;
+      }
+      try {
+        const vectorStoreClient = await getVectorStoreClient();
+        vectorStoreStatus.configured = vectorStoreClient !== null;
+        if (vectorStoreClient) {
           vectorStoreStatus.connected = await vectorStoreClient.getHealth();
-        } catch (error) {
-          vectorStoreStatus.error =
-            error instanceof Error ? error.message : "Unknown error";
         }
+      } catch (error) {
+        vectorStoreStatus.configured = true;
+        vectorStoreStatus.error =
+          error instanceof Error ? error.message : "Unknown error";
       }
 
       browserStatus.configured =
@@ -663,7 +806,7 @@ export const adminAppRouter = router({
           if (serverConfig.crawler.browserWebUrl) {
             const webUrl = new URL(serverConfig.crawler.browserWebUrl);
             const { address } = await dns.promises.lookup(webUrl.hostname);
-            webUrl.hostname = address;
+            setUrlHostnameFromResolvedAddress(webUrl, address);
             webUrl.pathname = "/json/version";
             const response = await fetch(`${webUrl.toString()}`, {
               signal: AbortSignal.timeout(5000),
@@ -924,5 +1067,24 @@ export const adminAppRouter = router({
           groupId: "admin",
         },
       );
+    }),
+  forceStripeSync: adminSystemProcedure
+    .input(z.object({ userId: z.string() }))
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ input, ctx }) => {
+      const subscription = await ctx.db.query.subscriptions.findFirst({
+        where: eq(subscriptions.userId, input.userId),
+      });
+
+      if (!subscription?.stripeCustomerId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No Stripe customer found for the given user",
+        });
+      }
+
+      await syncStripeDataToDatabase(subscription.stripeCustomerId, ctx.db);
+
+      return { success: true };
     }),
 });

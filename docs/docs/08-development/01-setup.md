@@ -72,7 +72,6 @@ Packages: +3129
 Progress: resolved 0, reused 2699, downloaded 0, added 3129, done
 
 devDependencies:
-+ @karakeep/prettier-config 0.1.0 <- tooling/prettier
 
 . prepare$ husky
 └─ Done in 45ms
@@ -88,7 +87,7 @@ You can now continue with the rest of this documentation.
 - Start by copying the template by `cp .env.sample .env`.
 - The most important env variables to set are:
   - `DATA_DIR`: Where the database and assets will be stored. This is the only required env variable. You can use an absolute path so that all apps point to the same dir.
-  - `NEXTAUTH_SECRET`: Random string used to sign the JWT tokens. Generate one with `openssl rand -base64 36`. Logging in will not work if this is missing!
+  - `NEXTAUTH_SECRET`: Random string used to secure authentication cookies and tokens. Generate one with `openssl rand -base64 36`. Logging in will not work if this is missing!
   - `MEILI_ADDR`: If not set, search will be disabled. You can set it to `http://127.0.0.1:7700` if you run meilisearch using the command below.
   - `OPENAI_API_KEY`: If you want to enable auto tag inference in the dev env.
 - run `pnpm run db:migrate` in the root of the repo to set up the database.
@@ -97,7 +96,7 @@ You can now continue with the rest of this documentation.
 
 #### Meilisearch
 
-Meilisearch is the provider for the full text search (and at some point embeddings search too). You can get it running with `docker run -p 7700:7700 getmeili/meilisearch:v1.41.0`.
+Meilisearch is the provider for the full text search (and at some point embeddings search too). You can get it running with `docker run -p 7700:7700 getmeili/meilisearch:v1.55.0`.
 
 Mount persistent volume if you want to keep index data across restarts. You can trigger a re-index for the entire items collection in the admin panel in the web app.
 
@@ -178,10 +177,10 @@ Note: Changing the code will hot reload the app. However, installing new package
 
 - `cd apps/browser-extension`
 - `pnpm dev`
-- This will generate a `dist` package
-- Go to extension settings in chrome and enable developer mode.
-- Press `Load unpacked` and point it to the `dist` directory.
-- The plugin will pop up in the plugin list.
+- This will start the extension dev server on `http://localhost:5174` and generate a `dist` package.
+- Go to `chrome://extensions` in Chrome or Brave and enable developer mode.
+- Press `Load unpacked` and point it to the `apps/browser-extension/dist` directory.
+- The extension will pop up in the extension list.
 
 In dev mode, opening and closing the plugin menu should reload the code.
 

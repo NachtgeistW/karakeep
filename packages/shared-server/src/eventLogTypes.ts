@@ -6,6 +6,17 @@ type EventLogInternal =
       "crawler.domain"?: string;
       "crawler.status_code"?: number | null;
       "crawler.proxy"?: string;
+      // Outcome of the preflight probe's metadata extraction.
+      "crawler.probe.metadata"?:
+        | "extracted"
+        | "blocked_status"
+        | "challenge_page"
+        | "reused_stored"
+        | "failed";
+      // Whether the rendered page was considered blocked (retryable status
+      // code or a detected challenge page), flipping metadata precedence to
+      // the preflight probe.
+      "crawler.render_blocked"?: boolean;
     }
   | {
       ["event.name"]: "inferenceWorker.run";
@@ -161,6 +172,8 @@ type EventLogInternal =
   | {
       ["event.name"]: "search.query";
       "search.has_query"?: boolean;
+      "search.mode"?: "fts" | "semantic" | "hybrid";
+      "search.degraded"?: boolean;
       "search.results_count"?: number;
     }
   | { ["event.name"]: "bookmarks.queried" }
@@ -176,7 +189,7 @@ type EventLogInternal =
       "subscription.status"?: string;
       "subscription.prev_tier"?: string;
       "subscription.prev_status"?: string;
-      "subscription.sync_skipped_reason"?: "unknown_customer";
+      "subscription.sync_skipped_reason"?: "unknown_customer" | "manual_tier";
       "subscription.cancel_at_period_end"?: boolean;
       "subscription.transition"?:
         | "upgrade"
@@ -184,12 +197,29 @@ type EventLogInternal =
         | "renewed"
         | "scheduled_cancellation"
         | "resubscribe"
+        | "payment_failed"
         | "no_change";
     }
   | {
       ["event.name"]: "subscription.webhook_received";
       "stripe.event_type": string;
       "stripe.customer_id"?: string;
+    }
+  | {
+      ["event.name"]: "subscription.in_app_synced";
+      "revenuecat.store"?: string;
+      "revenuecat.product_id"?: string;
+      "subscription.status"?: string;
+      "subscription.prev_status"?: string;
+      "subscription.tier"?: "paid" | "free" | "manual";
+      "subscription.cancel_at_period_end"?: boolean;
+      "subscription.is_sandbox"?: boolean;
+      "subscription.sync_skipped_reason"?: "no_entitlement";
+    }
+  | {
+      ["event.name"]: "subscription.in_app_webhook_received";
+      "revenuecat.event_type"?: string;
+      "revenuecat.synced_users_count"?: number;
     };
 
 interface CommonEventLogFields {
